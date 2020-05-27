@@ -3,11 +3,11 @@ server:
   ssl:
     enabled: true
     key-store: ssl.jks
-    key-store-type: JKS
+    key-store-type: PKCS12
     key-store-password: m960326
     key-alias: spring
-    trust-store: ssl.jks
-    trust-store-password: m960326
+#    trust-store: trustStore.ts
+#    trust-store-password: m960326
 spring:
   servlet:
     multipart:
