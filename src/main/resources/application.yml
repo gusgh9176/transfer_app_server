@@ -2,8 +2,8 @@ server:
   port: 443
   ssl:
     enabled: true
-    key-store: ssl.p12
-    key-store-type: PKCS12
+    key-store: cert.jks
+    key-store-type: JKS
     key-store-password: m960326
     key-alias: spring
 #    trust-store: trustStore.ts
