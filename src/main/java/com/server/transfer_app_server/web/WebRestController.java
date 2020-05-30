@@ -1,5 +1,7 @@
 package com.server.transfer_app_server.web;
 
+import com.server.transfer_app_server.dto.MobileTokenSaveRequestDto;
+import com.server.transfer_app_server.service.MobileTokenService;
 import com.server.transfer_app_server.vo.MobileTokenVO;
 import lombok.AllArgsConstructor;
 import org.springframework.ui.Model;
@@ -14,12 +16,13 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 
 
 @RestController
 @AllArgsConstructor
 public class WebRestController {
+
+    private MobileTokenService mobileTokenService;
 
     @PostMapping(value = "/upload")
     @ResponseBody
@@ -36,10 +39,8 @@ public class WebRestController {
     @PostMapping(value = "/download")
     @ResponseBody
     public void fileDownload(@RequestBody HashMap<String, Object> tokenMap, HttpServletResponse response) {
-//        MobileTokenVO mobileTokenVO
         System.out.println("토큰: " + tokenMap.values());
-//        System.out.println("토큰: " + mobileTokenVO);
-//        System.out.println("토큰: " + Token.);
+
         File[] fileList = null;
         try {
             String baseDir = "C:\\ServerFiles";
@@ -79,13 +80,38 @@ public class WebRestController {
         }
     }
 
-    @RequestMapping(value = "mobile/sendFCM")
-    public String index(Model model, HttpServletRequest request, HttpSession session, MobileTokenVO vo) throws Exception {
+    // DB에 Name과 FCMToken 저장
+    @PostMapping(value = "mobile/insert/FCMToken")
+    public Long saveFCMToken(@RequestBody MobileTokenSaveRequestDto dto) throws Exception{
+        System.out.println("name: "+dto.getName());
+        System.out.println("tokent: "+dto.getToken());
+        return mobileTokenService.save(dto);
+    }
+
+    // DB에 Name 업데이트
+    @RequestMapping(value = "mobile/update/FCMToken")
+    public Long updateName(@RequestBody MobileTokenSaveRequestDto dto) throws Exception{
+        return mobileTokenService.update(dto);
+    }
+
+    // DB 목록 확인
+    @RequestMapping(value = "mobile/print/FCMToken")
+    public void updateName() throws Exception{
+        mobileTokenService.findAllDesc();
+    }
+
+    // Name으로 받아서 Token 찾아야함
+    // vo는 보낼 사람의 name
+    @RequestMapping(value = "mobile/send/FCMToken")
+    public String index(Model model, HttpServletRequest request, HttpSession session, @RequestBody MobileTokenVO vo) throws Exception {
 
 //        List<MobileTokenVO> tokenList = fcmService.loadFCMInfoList(vo);
 
 //        String token = tokenList.get(count).getDEVICE_ID();
 
+        String token = mobileTokenService.findByName(vo.getName());
+
+        // FireBase API Key
         final String apiKey = "AAAAo3HPVw0:APA91bEdVX4pA3qspRIA8H-ie_Qda8f9c2sFIBsT2Ocz9sUFXwGKljl3xT5wEbABQ906kOAk8h33SBI7HhXr0AUmkHHSXR7o3kStRfyoVEm7e8QEpL3D1p1UQwCeKz23MNH1ZcqLDiNN";
         URL url = new URL("https://fcm.googleapis.com/fcm/send");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -99,10 +125,10 @@ public class WebRestController {
         String userId = (String) request.getSession().getAttribute("ssUserId");
 
         // 이렇게 보내면 주제를 ALL로 지정해놓은 모든 사람들한테 알림을 날려준다.
-        String input = "{\"notification\" : {\"title\" : \"여기다 제목 넣기 \", \"body\" : \"여기다 내용 넣기\"}, \"to\":\"/topics/ALL\"}";
+//        String input = "{\"notification\" : {\"title\" : \"여기다 제목 넣기 \", \"body\" : \"여기다 내용 넣기\"}, \"to\":\"/topics/ALL\"}";
 
         // 이걸로 보내면 특정 토큰을 가지고있는 어플에만 알림을 날려준다  위에 둘중에 한개 골라서 날려주자
-//        String input = "{\"notification\" : {\"title\" : \" 여기다 제목넣기 \", \"body\" : \"여기다 내용 넣기\"}, \"to\":\" 여기가 받을 사람 토큰  \"}";
+        String input = "{\"notification\" : {\"title\" : \" 여기다 제목넣기 \", \"body\" : \"여기다 내용 넣기\"}, \"to\":\" " + token + "\"}";
 
         OutputStream os = conn.getOutputStream();
 
