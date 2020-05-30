@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @AllArgsConstructor
 public class WebController {
 
-    @GetMapping("/")
+    @GetMapping(value = "/")
     public String main(){
         return "main";
     }
