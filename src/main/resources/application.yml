@@ -1,15 +1,30 @@
-server:
-  port: 443
-  ssl:
-    enabled: true
-    key-store: cert.jks
-    key-store-type: JKS
-    key-store-password: m960326
-    key-alias: spring
-#    trust-store: trustStore.ts
-#    trust-store-password: m960326
 spring:
+  profiles:
+    active: local # 기본 환경 선택
+
+# local 환경
+---
+spring:
+  profiles: local
   servlet:
-    multipart:
-      max-file-size: 20MB
-      max-request-size: 120MB
+    multipart: # 최대 용량 설정
+      max-file-size: 20MB # 최대 file 용량
+      max-request-size: 120MB # 최대 request 용량
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+  h2:
+    console:
+      enabled: true
+  server:
+    port: 8080
+#    ssl:
+#      enabled: true
+#      key-store: cert.jks
+#      key-store-type: JKS
+#      key-store-password: m960326
+#      key-alias: spring
+
+# deploy 환경
+---
