@@ -96,7 +96,7 @@ public class WebRestController {
 
     // DB 목록 확인
     @RequestMapping(value = "mobile/print/FCMToken")
-    public void updateName() throws Exception{
+    public void printName() throws Exception{
         mobileTokenService.findAllDesc();
     }
 
@@ -104,10 +104,6 @@ public class WebRestController {
     // vo는 보낼 사람의 name
     @RequestMapping(value = "mobile/send/FCMToken")
     public String index(Model model, HttpServletRequest request, HttpSession session, @RequestBody MobileTokenVO vo) throws Exception {
-
-//        List<MobileTokenVO> tokenList = fcmService.loadFCMInfoList(vo);
-
-//        String token = tokenList.get(count).getDEVICE_ID();
 
         String token = mobileTokenService.findByName(vo.getName());
 
@@ -152,7 +148,6 @@ public class WebRestController {
         in.close();
         // print result
         System.out.println(response.toString());
-
 
         return "jsonView";
     }

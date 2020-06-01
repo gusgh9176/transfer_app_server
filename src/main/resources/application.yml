@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: deploy # 기본 환경 선택
+    active: local # 기본 환경 선택
 
 # local 환경
 ---
