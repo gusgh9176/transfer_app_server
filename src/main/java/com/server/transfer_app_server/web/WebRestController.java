@@ -1,5 +1,10 @@
 package com.server.transfer_app_server.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.server.transfer_app_server.dto.MobileTokenMainReponseDto;
+import com.server.transfer_app_server.dto.MobileTokenReadReqeustDto;
 import com.server.transfer_app_server.dto.MobileTokenSaveRequestDto;
 import com.server.transfer_app_server.service.MobileTokenService;
 import com.server.transfer_app_server.vo.MobileTokenVO;
@@ -8,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -16,6 +20,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 
 
 @RestController
@@ -80,11 +85,43 @@ public class WebRestController {
         }
     }
 
+    @PostMapping(value = "mobile/get/UserList")
+    @ResponseBody
+    public void responseUserList(@RequestBody MobileTokenReadReqeustDto dto, HttpServletResponse response) throws JsonProcessingException {
+        String token = dto.getToken();
+        boolean isExist = mobileTokenService.isExistToken(token);
+
+        // 보낸쪽 token 서버 DB에 저장 안되있으면 이상한 접근이므로 유저 목록 제공 안함
+        if(!isExist){
+            System.out.println("미존재");
+            System.out.println("앱 외에서의 접근");
+            return;
+        }
+
+        List<MobileTokenMainReponseDto> userList = mobileTokenService.findAllDesc();
+
+        // Response에 유저목록 Json으로 담아 응답
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonStr = mapper.writeValueAsString(userList);
+        String contentType = "application/json";
+
+        try {
+            response.setContentType(contentType);
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Pragma", "no-cache;");
+            response.setHeader("Expires", "-1;");
+            response.getWriter().write(jsonStr);
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+//            throw new RuntimeException("Json Parsing Error");
+        }
+    }
+
     // DB에 Name과 FCMToken 저장
     @PostMapping(value = "mobile/insert/FCMToken")
     public Long saveFCMToken(@RequestBody MobileTokenSaveRequestDto dto) throws Exception{
         System.out.println("name: "+dto.getName());
-        System.out.println("tokent: "+dto.getToken());
+        System.out.println("token: "+dto.getToken());
         return mobileTokenService.save(dto);
     }
 
@@ -97,7 +134,9 @@ public class WebRestController {
     // DB 목록 확인
     @RequestMapping(value = "mobile/print/FCMToken")
     public void printName() throws Exception{
-        mobileTokenService.findAllDesc();
+        System.out.println("현재 토큰 목록");
+        mobileTokenService.findAllDescPrint();
+        System.out.println("현재 토큰 목록 끝");
     }
 
     // Name으로 받아서 Token 찾아야함

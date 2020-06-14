@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,8 +38,24 @@ public class MobileTokenService {
     }
 
     @Transactional(readOnly = true)
-    public void findAllDesc() {
+    public List<MobileTokenMainReponseDto> findAllDesc() {
 
+        return mobileTokenRepository.findAllDesc()
+                .map(MobileTokenMainReponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    // 해당 Token이 존재하는지 확인
+    @Transactional(readOnly = true)
+    public Boolean isExistToken(String token){
+        Optional<MobileTokenVO> mobileTokenVO = mobileTokenRepository.findByToken(token);
+        return mobileTokenVO.isPresent();
+    }
+
+    // 테스트용 삭제예정
+    @Transactional(readOnly = true)
+    public void findAllDescPrint() {
+//         들어있는 내용 확인
         for(MobileTokenMainReponseDto m :mobileTokenRepository.findAllDesc().map(MobileTokenMainReponseDto::new).collect(Collectors.toList())){
             System.out.println("name: "+ m.getName() + ", " + "token: " + m.getToken());
         }
@@ -48,4 +65,5 @@ public class MobileTokenService {
     public String findByName(String name){
         return mobileTokenRepository.findByName(name).get().getToken();
     }
+
 }
