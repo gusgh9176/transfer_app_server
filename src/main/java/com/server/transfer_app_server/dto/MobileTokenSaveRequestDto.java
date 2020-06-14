@@ -14,7 +14,6 @@ public class MobileTokenSaveRequestDto {
     private String name;
     private String token;
 
-    @Builder
     public MobileTokenSaveRequestDto(String name, String token){
         this.name = name;
         this.token = token;

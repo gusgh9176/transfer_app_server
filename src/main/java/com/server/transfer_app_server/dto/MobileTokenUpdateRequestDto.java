@@ -15,6 +15,13 @@ public class MobileTokenUpdateRequestDto {
     private String name;
     private String token;
 
+
+    public MobileTokenUpdateRequestDto(Long id, String name, String token){
+        this.id = id;
+        this.name = name;
+        this.token = token;
+    }
+
     public MobileTokenVO toEntity(){
         return MobileTokenVO.builder()
                 .id(id)
@@ -23,10 +30,5 @@ public class MobileTokenUpdateRequestDto {
                 .build();
     }
 
-    @Builder
-    public MobileTokenUpdateRequestDto(Long id, String name, String token){
-        this.id = id;
-        this.name = name;
-        this.token = token;
-    }
+
 }
