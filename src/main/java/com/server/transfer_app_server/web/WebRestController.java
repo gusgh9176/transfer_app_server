@@ -2,8 +2,8 @@ package com.server.transfer_app_server.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.server.transfer_app_server.dto.MobileTokenMainReponseDto;
+import com.server.transfer_app_server.dto.MobileTokenNameResponseDto;
 import com.server.transfer_app_server.dto.MobileTokenReadReqeustDto;
 import com.server.transfer_app_server.dto.MobileTokenSaveRequestDto;
 import com.server.transfer_app_server.service.MobileTokenService;
@@ -85,7 +85,7 @@ public class WebRestController {
         }
     }
 
-    @PostMapping(value = "mobile/get/UserList")
+    @PostMapping(value = "mobile/read/UserList")
     @ResponseBody
     public void responseUserList(@RequestBody MobileTokenReadReqeustDto dto, HttpServletResponse response) throws JsonProcessingException {
         String token = dto.getToken();
@@ -98,7 +98,7 @@ public class WebRestController {
             return;
         }
 
-        List<MobileTokenMainReponseDto> userList = mobileTokenService.findAllDesc();
+        List<MobileTokenNameResponseDto> userList = mobileTokenService.returnNameList();
 
         // Response에 유저목록 Json으로 담아 응답
         ObjectMapper mapper = new ObjectMapper();
@@ -144,7 +144,7 @@ public class WebRestController {
     @RequestMapping(value = "mobile/send/FCMToken")
     public String index(Model model, HttpServletRequest request, HttpSession session, @RequestBody MobileTokenVO vo) throws Exception {
 
-        String token = mobileTokenService.findByName(vo.getName());
+        String token = mobileTokenService.findByName(vo.getName()).getToken();
 
         // FireBase API Key
         final String apiKey = "AAAAo3HPVw0:APA91bEdVX4pA3qspRIA8H-ie_Qda8f9c2sFIBsT2Ocz9sUFXwGKljl3xT5wEbABQ906kOAk8h33SBI7HhXr0AUmkHHSXR7o3kStRfyoVEm7e8QEpL3D1p1UQwCeKz23MNH1ZcqLDiNN";

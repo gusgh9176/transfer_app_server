@@ -1,6 +1,7 @@
 package com.server.transfer_app_server.service;
 
 import com.server.transfer_app_server.dto.MobileTokenMainReponseDto;
+import com.server.transfer_app_server.dto.MobileTokenNameResponseDto;
 import com.server.transfer_app_server.dto.MobileTokenSaveRequestDto;
 import com.server.transfer_app_server.dto.MobileTokenUpdateRequestDto;
 import com.server.transfer_app_server.repository.MobileTokenRepository;
@@ -56,14 +57,25 @@ public class MobileTokenService {
     @Transactional(readOnly = true)
     public void findAllDescPrint() {
 //         들어있는 내용 확인
-        for(MobileTokenMainReponseDto m :mobileTokenRepository.findAllDesc().map(MobileTokenMainReponseDto::new).collect(Collectors.toList())){
+        for(MobileTokenMainReponseDto m : mobileTokenRepository.findAllDesc().map(MobileTokenMainReponseDto::new).collect(Collectors.toList())){
             System.out.println("name: "+ m.getName() + ", " + "token: " + m.getToken());
         }
     }
 
     @Transactional(readOnly = true)
-    public String findByName(String name){
-        return mobileTokenRepository.findByName(name).get().getToken();
+    public MobileTokenVO findByName(String name){
+
+        return mobileTokenRepository.findByName(name).get();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MobileTokenNameResponseDto> returnNameList(){
+        List<MobileTokenNameResponseDto> dtoList = new ArrayList<>();
+        for(MobileTokenMainReponseDto m : mobileTokenRepository.findAllDesc().map(MobileTokenMainReponseDto::new).collect(Collectors.toList())){
+            dtoList.add(new MobileTokenNameResponseDto(m.getName()));
+        }
+
+        return dtoList;
     }
 
 }
