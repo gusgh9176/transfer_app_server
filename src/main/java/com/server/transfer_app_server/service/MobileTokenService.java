@@ -64,8 +64,12 @@ public class MobileTokenService {
 
     @Transactional(readOnly = true)
     public MobileTokenVO findByName(String name){
-
         return mobileTokenRepository.findByName(name).get();
+    }
+
+    @Transactional(readOnly = true)
+    public MobileTokenVO findByToken(String token){
+        return mobileTokenRepository.findByToken(token).get();
     }
 
     @Transactional(readOnly = true)
