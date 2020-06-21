@@ -144,8 +144,8 @@ public class WebRestController {
     @RequestMapping(value = "mobile/send/FCMToken")
     public String index(Model model, HttpServletRequest request, HttpSession session, @RequestBody MobileTokenVO vo) throws Exception {
 
-        String opponentToken = mobileTokenService.findByName(vo.getName()).getToken(); // 상대 token
-        String MyName = mobileTokenService.findByToken(vo.getToken()).getName(); // 자신 name
+        String receiverToken = mobileTokenService.findByName(vo.getName()).getToken(); // 상대 token
+        String senderName = mobileTokenService.findByToken(vo.getToken()).getName(); // 자신 name
 
         // FireBase API Key
         final String apiKey = "AAAAo3HPVw0:APA91bEdVX4pA3qspRIA8H-ie_Qda8f9c2sFIBsT2Ocz9sUFXwGKljl3xT5wEbABQ906kOAk8h33SBI7HhXr0AUmkHHSXR7o3kStRfyoVEm7e8QEpL3D1p1UQwCeKz23MNH1ZcqLDiNN";
@@ -164,7 +164,15 @@ public class WebRestController {
 //        String input = "{\"notification\" : {\"title\" : \"여기다 제목 넣기 \", \"body\" : \"여기다 내용 넣기\"}, \"to\":\"/topics/ALL\"}";
 
         // 이걸로 보내면 특정 토큰을 가지고있는 어플에만 알림을 날려준다  위에 둘중에 한개 골라서 날려주자
-        String input = "{\"notification\" : {\"title\" : \" 전송요청 \", \"body\" : \" " + MyName + " 님이 전송요청을 보냈습니다.\"}, \"to\":\" " + opponentToken + "\"}";
+        String input = "{" +
+                "\"data\" : {" +
+                "\"title\" : \" 전송요청 \", " +
+                "\"body\" : \" " + senderName + " 님이 전송요청을 보냈습니다.\"" +
+                "\"senderName\" : \" " + senderName + "\", " +
+                "\"clickAction\" : \"DownloadActivity\" " +
+                "}" +
+                "\"to\":\" " + receiverToken + "\"" +
+                "}";
 
         OutputStream os = conn.getOutputStream();
 
