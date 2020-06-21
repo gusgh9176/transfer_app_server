@@ -47,11 +47,10 @@ public class WebRestController {
     @PostMapping(value = "/download")
     @ResponseBody
     public void fileDownload(@RequestBody MobileTokenVO vo, HttpServletResponse response) {
-        // vo의 data, vo.getName = 송신자 Name, vo.getToken = 수신자 Token
-        String senderName = vo.getName();
-        String receiverToken = vo.getToken();
+        String senderName = vo.getName(); // 송신자 Name
+        String receiverToken = vo.getToken(); // 수신자 Token
 
-        String senderToken = mobileTokenService.findByName(senderName).getToken(); // 송신자 token 찾기
+        String senderToken = mobileTokenService.findByName(senderName).getToken(); // 송신자 token
 
         boolean isExist = mobileTokenService.isExistToken(receiverToken);
         // 수신자 token 이 서버 DB에 저장 안되있으면 이상한 접근이므로 다운로드 실행 안함
@@ -61,7 +60,7 @@ public class WebRestController {
             return;
         }
         // 송신자 token 이 서버 DB에 저장 안되있으면 이상한 접근이므로 다운로드 실행 안함
-        else if(senderToken == "wrongName"){
+        else if(senderToken.equals("wrongName")){
             System.out.println("DB에 송신자 token 미존재");
             return;
         }
@@ -103,6 +102,7 @@ public class WebRestController {
         } catch (Exception ex) {
             throw new RuntimeException("file Load Error");
         }
+
     }
 
     @PostMapping(value = "mobile/read/UserList")
@@ -169,7 +169,7 @@ public class WebRestController {
 
         System.out.println("token: "+receiverToken);
         System.out.println("name: "+senderName);
-        fcmService.sendFCMMessage(senderName, receiverToken);
+        fcmService.sendDownloadFCMMessage(senderName, receiverToken);
 
         return "jsonView";
     }

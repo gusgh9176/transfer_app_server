@@ -13,7 +13,7 @@ import java.net.URL;
 @Service
 public class FCMService {
 
-    public void sendFCMMessage(String senderName, String receiverToken) throws Exception{
+    public void sendDownloadFCMMessage(String senderName, String receiverToken) throws Exception{
         // FireBase API Key
         final String apiKey = "AAAAo3HPVw0:APA91bEdVX4pA3qspRIA8H-ie_Qda8f9c2sFIBsT2Ocz9sUFXwGKljl3xT5wEbABQ906kOAk8h33SBI7HhXr0AUmkHHSXR7o3kStRfyoVEm7e8QEpL3D1p1UQwCeKz23MNH1ZcqLDiNN";
         URL url = new URL("https://fcm.googleapis.com/fcm/send");
