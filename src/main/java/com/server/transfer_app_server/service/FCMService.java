@@ -14,9 +14,38 @@ import java.net.URL;
 public class FCMService {
 
     public void sendDownloadFCMMessage(String senderName, String receiverToken) throws Exception{
+        String input = "{" +
+                "\"data\" : {" +
+                    "\"title\" : \"전송요청\", " +
+                    "\"body\" : \"" + senderName + "님이 전송요청을 보냈습니다.\", " +
+                    "\"senderName\" : \"" + senderName + "\", " +
+                    "\"clickAction\" : \"DownloadActivity\"" +
+                    "}, " +
+                "\"to\" : \"" + receiverToken + "\"" +
+                "}";
+        sendFCMMessage(input);
+    }
+
+    public void sendSuccessFCMMessage(String receiverName, String senderToken) throws Exception{
+        // 이걸로 보내면 특정 토큰을 가지고있는 어플에만 알림을 날려준다  위에 둘중에 한개 골라서 날려주자
+        String input = "{" +
+                "\"data\" : {" +
+                "\"title\" : \"전송요청 성공\", " +
+                "\"body\" : \"" + receiverName + "님에게로의 전송이 성공했습니다.\", " +
+                "\"senderName\" : \"" + receiverName + "\", " +
+                "\"clickAction\" : \"DownloadActivity\"" +
+                "}, " +
+                "\"to\" : \"" + senderToken + "\"" +
+                "}";
+        sendFCMMessage(input);
+    }
+
+    private void sendFCMMessage(String input) throws Exception{
         // FireBase API Key
         final String apiKey = "AAAAo3HPVw0:APA91bEdVX4pA3qspRIA8H-ie_Qda8f9c2sFIBsT2Ocz9sUFXwGKljl3xT5wEbABQ906kOAk8h33SBI7HhXr0AUmkHHSXR7o3kStRfyoVEm7e8QEpL3D1p1UQwCeKz23MNH1ZcqLDiNN";
-        URL url = new URL("https://fcm.googleapis.com/fcm/send");
+        String fcmUrl = "https://fcm.googleapis.com/fcm/send";
+
+        URL url = new URL(fcmUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
@@ -24,23 +53,6 @@ public class FCMService {
         conn.setRequestProperty("Authorization", "key=" + apiKey);
 
         conn.setDoOutput(true);
-
-//        String userId = (String) request.getSession().getAttribute("ssUserId");
-//        System.out.println("userId: " + userId);
-
-        // 이렇게 보내면 주제를 ALL로 지정해놓은 모든 사람들한테 알림을 날려준다.
-//        String input = "{\"notification\" : {\"title\" : \"여기다 제목 넣기 \", \"body\" : \"여기다 내용 넣기\"}, \"to\":\"/topics/ALL\"}";
-
-        // 이걸로 보내면 특정 토큰을 가지고있는 어플에만 알림을 날려준다  위에 둘중에 한개 골라서 날려주자
-        String input = "{" +
-                "\"data\" : {" +
-                "\"title\" : \"전송요청\", " +
-                "\"body\" : \"" + senderName + "님이 전송요청을 보냈습니다.\", " +
-                "\"senderName\" : \"" + senderName + "\", " +
-                "\"clickAction\" : \"DownloadActivity\"" +
-                "}, " +
-                "\"to\":\" " + receiverToken + "\"" +
-                "}";
 
         OutputStream os = conn.getOutputStream();
 
@@ -66,4 +78,5 @@ public class FCMService {
         // print result
         System.out.println(response.toString());
     }
+
 }
