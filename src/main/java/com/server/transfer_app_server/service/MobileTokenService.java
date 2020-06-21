@@ -64,12 +64,12 @@ public class MobileTokenService {
 
     @Transactional(readOnly = true)
     public MobileTokenVO findByName(String name){
-        return mobileTokenRepository.findByName(name).get();
+        return mobileTokenRepository.findByName(name).orElse(new MobileTokenVO((long)-1, "wrongName", "wrongName"));
     }
 
     @Transactional(readOnly = true)
     public MobileTokenVO findByToken(String token){
-        return mobileTokenRepository.findByToken(token).get();
+        return mobileTokenRepository.findByToken(token).orElse(new MobileTokenVO((long)-1, "wrongToken", "wrongToken"));
     }
 
     @Transactional(readOnly = true)

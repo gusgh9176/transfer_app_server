@@ -41,14 +41,32 @@ public class WebRestController {
     }
 
     // https://takeknowledge.tistory.com/62
+    // vo에 담겨서 송신자의 name과 수신자의 token 전달됨
     @PostMapping(value = "/download")
     @ResponseBody
-    public void fileDownload(@RequestBody HashMap<String, Object> tokenMap, HttpServletResponse response) {
-        System.out.println("토큰: " + tokenMap.values());
+    public void fileDownload(@RequestBody MobileTokenVO vo, HttpServletResponse response) {
+        // vo의 data, vo.getName = 송신자 Name, vo.getToken = 수신자 Token
+        String senderName = vo.getName();
+        String receiverToken = vo.getToken();
+
+        String senderToken = mobileTokenService.findByName(senderName).getToken(); // 송신자 token 찾기
+
+        boolean isExist = mobileTokenService.isExistToken(receiverToken);
+        // 수신자 token 이 서버 DB에 저장 안되있으면 이상한 접근이므로 다운로드 실행 안함
+        if(!isExist){
+            System.out.println("DB에 수신자 token 미존재");
+            System.out.println("앱 외에서의 접근");
+            return;
+        }
+        // 송신자 token 이 서버 DB에 저장 안되있으면 이상한 접근이므로 다운로드 실행 안함
+        else if(senderToken == "wrongName"){
+            System.out.println("DB에 송신자 token 미존재");
+            return;
+        }
 
         File[] fileList = null;
         try {
-            String baseDir = "C:\\ServerFiles";
+            String baseDir = "C:\\ServerFiles\\" + senderName; // 송신자 name 폴더로 들어감
             fileList = new File(baseDir).listFiles();
         } catch (Exception e) {
             e.printStackTrace();
@@ -141,11 +159,14 @@ public class WebRestController {
 
     // Name으로 받아서 Token 찾아야함
     // vo는 보낼 사람의 name
-    @RequestMapping(value = "mobile/send/FCMToken")
+    @PostMapping(value = "mobile/send/FCMToken")
     public String index(Model model, HttpServletRequest request, HttpSession session, @RequestBody MobileTokenVO vo) throws Exception {
 
-        String receiverToken = mobileTokenService.findByName(vo.getName()).getToken(); // 상대 token
-        String senderName = mobileTokenService.findByToken(vo.getToken()).getName(); // 자신 name
+        String receiverToken = mobileTokenService.findByName(vo.getName()).getToken(); // 수신자 token
+        String senderName = mobileTokenService.findByToken(vo.getToken()).getName(); // 송신자 name
+
+        System.out.println("token: "+receiverToken);
+        System.out.println("name: "+senderName);
 
         // FireBase API Key
         final String apiKey = "AAAAo3HPVw0:APA91bEdVX4pA3qspRIA8H-ie_Qda8f9c2sFIBsT2Ocz9sUFXwGKljl3xT5wEbABQ906kOAk8h33SBI7HhXr0AUmkHHSXR7o3kStRfyoVEm7e8QEpL3D1p1UQwCeKz23MNH1ZcqLDiNN";
@@ -166,11 +187,11 @@ public class WebRestController {
         // 이걸로 보내면 특정 토큰을 가지고있는 어플에만 알림을 날려준다  위에 둘중에 한개 골라서 날려주자
         String input = "{" +
                 "\"data\" : {" +
-                "\"title\" : \" 전송요청 \", " +
-                "\"body\" : \" " + senderName + " 님이 전송요청을 보냈습니다.\"" +
-                "\"senderName\" : \" " + senderName + "\", " +
-                "\"clickAction\" : \"DownloadActivity\" " +
-                "}" +
+                "\"title\" : \"전송요청\", " +
+                "\"body\" : \"" + senderName + "님이 전송요청을 보냈습니다.\", " +
+                "\"senderName\" : \"" + senderName + "\", " +
+                "\"clickAction\" : \"DownloadActivity\"" +
+                "}, " +
                 "\"to\":\" " + receiverToken + "\"" +
                 "}";
 
@@ -199,6 +220,4 @@ public class WebRestController {
 
         return "jsonView";
     }
-
-
 }
