@@ -33,7 +33,7 @@ public class FCMService {
                 "\"title\" : \"전송요청 성공\", " +
                 "\"body\" : \"" + receiverName + "님에게로의 전송이 성공했습니다.\", " +
                 "\"senderName\" : \"" + receiverName + "\", " +
-                "\"clickAction\" : \"DownloadActivity\"" +
+                "\"clickAction\" : \"MainActivity\"" +
                 "}, " +
                 "\"to\" : \"" + senderToken + "\"" +
                 "}";
