@@ -6,6 +6,7 @@ import com.server.transfer_app_server.dto.MobileTokenMainReponseDto;
 import com.server.transfer_app_server.dto.MobileTokenNameResponseDto;
 import com.server.transfer_app_server.dto.MobileTokenReadReqeustDto;
 import com.server.transfer_app_server.dto.MobileTokenSaveRequestDto;
+import com.server.transfer_app_server.service.FCMService;
 import com.server.transfer_app_server.service.MobileTokenService;
 import com.server.transfer_app_server.vo.MobileTokenVO;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,6 @@ import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -28,6 +28,7 @@ import java.util.List;
 public class WebRestController {
 
     private MobileTokenService mobileTokenService;
+    private FCMService fcmService;
 
     @PostMapping(value = "/upload")
     @ResponseBody
@@ -41,6 +42,7 @@ public class WebRestController {
     }
 
     // https://takeknowledge.tistory.com/62
+    // 보안 생각해봐야함
     // vo에 담겨서 송신자의 name과 수신자의 token 전달됨
     @PostMapping(value = "/download")
     @ResponseBody
@@ -160,63 +162,14 @@ public class WebRestController {
     // Name으로 받아서 Token 찾아야함
     // vo는 보낼 사람의 name
     @PostMapping(value = "mobile/send/FCMToken")
-    public String index(Model model, HttpServletRequest request, HttpSession session, @RequestBody MobileTokenVO vo) throws Exception {
+    public String sendFCMMessage(Model model, HttpServletRequest request, HttpSession session, @RequestBody MobileTokenVO vo) throws Exception {
 
         String receiverToken = mobileTokenService.findByName(vo.getName()).getToken(); // 수신자 token
         String senderName = mobileTokenService.findByToken(vo.getToken()).getName(); // 송신자 name
 
         System.out.println("token: "+receiverToken);
         System.out.println("name: "+senderName);
-
-        // FireBase API Key
-        final String apiKey = "AAAAo3HPVw0:APA91bEdVX4pA3qspRIA8H-ie_Qda8f9c2sFIBsT2Ocz9sUFXwGKljl3xT5wEbABQ906kOAk8h33SBI7HhXr0AUmkHHSXR7o3kStRfyoVEm7e8QEpL3D1p1UQwCeKz23MNH1ZcqLDiNN";
-        URL url = new URL("https://fcm.googleapis.com/fcm/send");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setDoOutput(true);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("Authorization", "key=" + apiKey);
-
-        conn.setDoOutput(true);
-
-        String userId = (String) request.getSession().getAttribute("ssUserId");
-
-        // 이렇게 보내면 주제를 ALL로 지정해놓은 모든 사람들한테 알림을 날려준다.
-//        String input = "{\"notification\" : {\"title\" : \"여기다 제목 넣기 \", \"body\" : \"여기다 내용 넣기\"}, \"to\":\"/topics/ALL\"}";
-
-        // 이걸로 보내면 특정 토큰을 가지고있는 어플에만 알림을 날려준다  위에 둘중에 한개 골라서 날려주자
-        String input = "{" +
-                "\"data\" : {" +
-                "\"title\" : \"전송요청\", " +
-                "\"body\" : \"" + senderName + "님이 전송요청을 보냈습니다.\", " +
-                "\"senderName\" : \"" + senderName + "\", " +
-                "\"clickAction\" : \"DownloadActivity\"" +
-                "}, " +
-                "\"to\":\" " + receiverToken + "\"" +
-                "}";
-
-        OutputStream os = conn.getOutputStream();
-
-        // 서버에서 날려서 한글 깨지는 사람은 아래처럼  UTF-8로 인코딩해서 날려주자
-        os.write(input.getBytes("UTF-8"));
-        os.flush();
-        os.close();
-
-        int responseCode = conn.getResponseCode();
-        System.out.println("\nSending 'POST' request to URL : " + url);
-        System.out.println("Post parameters : " + input);
-        System.out.println("Response Code : " + responseCode);
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        // print result
-        System.out.println(response.toString());
+        fcmService.sendFCMMessage(senderName, receiverToken);
 
         return "jsonView";
     }
