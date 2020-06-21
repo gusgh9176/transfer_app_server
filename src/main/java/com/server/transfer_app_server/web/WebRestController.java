@@ -90,7 +90,6 @@ public class WebRestController {
         String contentType = "multipart/formed-data";
         System.out.println("파일이름: " + fileName);
 
-
         response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
         response.setHeader("Content-Transfer-Encoding", "binary");
         response.setHeader("Content-Type", contentType);
@@ -113,9 +112,26 @@ public class WebRestController {
         } catch (Exception ex) {
             throw new RuntimeException("file Load Error");
         }
+        // 업로드 완료된 파일과 폴더 삭제
+        try {
+            String baseDir = "C:\\ServerFiles\\" + senderToken.substring(senderTokenLength-10, senderTokenLength);
+            File folder = new File(baseDir);
+            while(folder.exists()){
+                File[] folder_list = folder.listFiles(); // 파일 리스트 얻어오기
+
+                for(int i=0; i<folder_list.length; i++){
+                    folder_list[i].delete(); // 파일 삭제
+                }
+                if(folder_list.length==0 && folder.isDirectory()){
+                    folder.delete(); // 폴더 삭제
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         fcmService.sendSuccessFCMMessage(receiverName, senderToken);
-
+        
     }
 
     @PostMapping(value = "mobile/read/UserList")
