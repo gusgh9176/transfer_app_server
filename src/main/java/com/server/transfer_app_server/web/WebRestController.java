@@ -27,6 +27,7 @@ public class WebRestController {
     private MobileTokenService mobileTokenService;
     private FCMService fcmService;
 
+    // 1번째
     @PostMapping(value = "/upload")
     @ResponseBody
     public void fileUpload(HttpServletRequest request, @RequestPart MultipartFile files) {
@@ -36,7 +37,7 @@ public class WebRestController {
         File userFolder = new File(baseDir); // user 폴더
         try {
             // 유저 폴더 없을 시 생성
-            if(!userFolder.exists()){
+            if (!userFolder.exists()) {
                 userFolder.mkdir();
                 System.out.println(baseDir + "의 폴더가 생성되었습니다.");
                 System.out.println("경로: " + userFolder);
@@ -78,7 +79,7 @@ public class WebRestController {
 
         File[] fileList = null;
         try {
-            String baseDir = "C:\\ServerFiles\\" + senderToken.substring(senderTokenLength-10, senderTokenLength); // 송신자 name 폴더로 들어감
+            String baseDir = "C:\\ServerFiles\\" + senderToken.substring(senderTokenLength - 10, senderTokenLength); // 송신자 name 폴더로 들어감
             fileList = new File(baseDir).listFiles();
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,24 +115,23 @@ public class WebRestController {
         }
         // 업로드 완료된 파일과 폴더 삭제
         try {
-            String baseDir = "C:\\ServerFiles\\" + senderToken.substring(senderTokenLength-10, senderTokenLength);
+            String baseDir = "C:\\ServerFiles\\" + senderToken.substring(senderTokenLength - 10, senderTokenLength);
             File folder = new File(baseDir);
-            while(folder.exists()){
+            while (folder.exists()) {
                 File[] folder_list = folder.listFiles(); // 파일 리스트 얻어오기
 
-                for(int i=0; i<folder_list.length; i++){
+                for (int i = 0; i < folder_list.length; i++) {
                     folder_list[i].delete(); // 파일 삭제
                 }
-                if(folder_list.length==0 && folder.isDirectory()){
+                if (folder_list.length == 0 && folder.isDirectory()) {
                     folder.delete(); // 폴더 삭제
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         fcmService.sendSuccessFCMMessage(receiverName, senderToken);
-        
     }
 
     @PostMapping(value = "mobile/read/UserList")
@@ -174,7 +174,7 @@ public class WebRestController {
         return mobileTokenService.save(dto);
     }
 
-    // DB에 Name 업데이트
+    // DB에 변경된 Name 업데이트
     @RequestMapping(value = "mobile/update/FCMToken")
     public Long updateName(@RequestBody MobileTokenSaveRequestDto dto) throws Exception {
         return mobileTokenService.update(dto);
@@ -196,11 +196,11 @@ public class WebRestController {
         String receiverToken = mobileTokenService.findByName(vo.getName()).getToken(); // 수신자 token
         String senderName = mobileTokenService.findByToken(vo.getToken()).getName(); // 송신자 name
 
-        if(receiverToken.equals("wrongName") || senderName.equals("wrongToken")){
+        if (receiverToken.equals("wrongName") || senderName.equals("wrongToken")) {
             System.out.println("DB에 없는 name 또는 token");
             return;
         }
         fcmService.sendDownloadFCMMessage(senderName, receiverToken);
-
     }
+
 }
